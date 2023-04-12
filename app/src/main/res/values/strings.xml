@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">Stock Quotes</string>
+    <string name="exchange_name">Exchange name:</string>
+    <string name="stock_list">Stocks</string>
+    <string name="favorites">Favorites</string>
+    <string name="market_news">News</string>
+    <string name="search">Search</string>
+
+    <plurals name="search_counts">
+        <item quantity="one">found %1$d result</item>
+        <item quantity="other">found %1$d results</item>
+    </plurals>
+
+
+
+
+    <string name="nasdaq_top100">AAPL,MSFT,AMZN,TSLA,GOOG,GOOGL,NVDA,META,PEP,COST,AVGO,ADBE,CSCO,TMUS,CMCSA,
+TXN,QCOM,AMD,INTC,INTU,HON,AMGN,PYPL,NFLX,ADP,SBUX,AMAT,ADI,MDLZ,BKNG,ISRG,CHTR,GILD,VRTX,CSX,MU,
+LRCX,FISV,MRNA,REGN,ATVI,SNPS,KLAC,KDP,MELI,MAR,AEP,PANW,CDNS,ADSK,ASML,NXPI,PAYX,ORLY,MNST,ABNB,
+KHC,MRVL,EXC,CTAS,FTNT,CRWD,XEL,MCHP,TEAM,LULU,AZN,DLTR,EA,CTSH,ODFL,DXCM,WDAY,WBA,IDXX,DDOG,ILMN,PCAR,
+BIIB,FAST,VRSK,ROST,SGEN,LCID,CPRT,BIDU,JD,EBAY,ZM,SIRI,CEG,ZS,ANSS,ALGN,VRSN,PDD,MTCH,SPLK,SWKS,NTES,OKTA,DOCU</string>
+
+    <string name="supported_exchange_preference_file_key">com.romankurilenko40.stockquotes.supportedExchanges</string>
+    <string-array name="supportedExchanges">
+        <item>US:XNAS:NASDAQ - All Markets</item>
+        <item>US:XNYS:New York Stock Exchange, Inc.</item>
+        <item>US:XASE:New York Stock Exchange (Amex)</item>
+        <item>US:BATS:CBOE BZX U.S. Equities Exchange</item>
+        <item>US:ARCX:New York Stock Exchange (Arca)</item>
+        <item>US:XNMS:NASDAQ Stock Market (GM)</item>
+        <item>US:XNCM:NASDAQ Stock Market (CM)</item>
+        <item>US:XNGS:NASDAQ Stock Market (GS)</item>
+    </string-array>
+
+    <string-array name="not_supportedExchanges">
+        <item>US:nasdaq_constituent:NASDAQ - top100</item>
+        <item>US:dowjones_constituent:Dow Jones</item>
+        <item>US:sp500_constituent:S&amp;P 500</item>
+    </string-array>
+
+    <string-array name="news_categories">
+        <item>general</item>
+        <item>forex</item>
+    </string-array>
+
+    <string name="news_general">general</string>
+    <string name="news_forex">forex</string>
+    <string name="news_crypto">crypto</string>
+    <string name="news_merger">merger</string>
+
+    <string name="capitalization_label">Market Capitalization</string>
+</resources>

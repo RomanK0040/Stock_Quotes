@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_stock_list">
+    <fragment
+        android:id="@+id/navigation_stock_list"
+        android:name="com.romankurilenko40.stockquotes.ui.stocklist.StockListFragment"
+        android:label="Stock List"
+        tools:layout="@layout/fragment_stock_list">
+        <action
+            android:id="@+id/action_navigation_stock_list_to_companyProfileFragment"
+            app:destination="@id/companyProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_search"
+        android:name="com.romankurilenko40.stockquotes.ui.search.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_navigation_search_to_companyProfileFragment"
+            app:destination="@id/companyProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_favorites"
+        android:name="com.romankurilenko40.stockquotes.ui.favorites.FavoritesFragment"
+        android:label="Favorites" >
+        <action
+            android:id="@+id/action_navigation_favorites_to_companyProfileFragment"
+            app:destination="@id/companyProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_market_news"
+        android:name="com.romankurilenko40.stockquotes.ui.newsfeed.MarketNewsFragment"
+        android:label="Market News" />
+    <fragment
+        android:id="@+id/companyProfileFragment"
+        android:name="com.romankurilenko40.stockquotes.ui.companyProfile.CompanyProfileFragment"
+        android:label="Company Profile" >
+    </fragment>
+
+</navigation>
