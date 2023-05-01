@@ -57,7 +57,7 @@ data class Candles(
         //List of timestamp
         val t: List<Long>?,
         //List of volume data
-        val v: List<Long>?
+        val v: List<Double>?
 )
 
 fun Candles.asQuoteEntryData(): List<Entry> {

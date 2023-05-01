@@ -9,7 +9,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
 
-
+enum class IntervalsInSeconds(val value: Long) {
+    YEAR_SECONDS(31556926),
+    MONTH_SECONDS(2629743),
+    WEEK_SECONDS(604800),
+    DAY_SECONDS(86400),
+    HOUR_SECONDS(3600)
+}
 
 private const val PAGE_SIZE = 15
 
@@ -98,16 +104,27 @@ class StockQuotesRepository() {
      * @param symbol - company displayed symbol (ticker)
      * @param resolution - time frames to divide the chart values
      */
-    suspend fun fetchStockCandles(symbol: String, resolution: String): Candles {
-        val unixYearSeconds = 31556926
-        val currentTimeSeconds = System.currentTimeMillis() / 1000
-        val candles = FinnhubApi.apiService.getCandles(
-            symbol,
-            resolution,
-            currentTimeSeconds - unixYearSeconds,
-            currentTimeSeconds)
+    suspend fun fetchStockCandles(symbol: String, resolution: String): CandlesDataResult {
 
-        return candles
+        val currentTimeSeconds = System.currentTimeMillis() / 1000
+        val startTimeInterval = getInitialIntervalValue(currentTimeSeconds,resolution)
+        val response = try {
+            val candlesData = FinnhubApi.apiService.getCandles(
+                symbol,
+                resolution,
+                from = startTimeInterval,
+                to = currentTimeSeconds)
+            if (candlesData.s == "ok") {
+                CandlesDataResult.AvailableChartData(candlesData)
+            } else {
+                CandlesDataResult.NoChartData("Chart data is not available")
+            }
+        } catch (e: Exception) {
+            e.message
+            CandlesDataResult.NoChartData("Error during fetching chart data")
+        }
+
+        return response
     }
 
     /**
@@ -117,10 +134,35 @@ class StockQuotesRepository() {
      * @param resolution - time frames to divide the chart values
      */
     suspend fun getQuoteChartData(symbol: String, resolution: String): List<Entry> {
-        return fetchStockCandles(symbol, resolution).asQuoteEntryData()
+
+        val data = fetchStockCandles(symbol, resolution)
+        return if (data is CandlesDataResult.AvailableChartData) {
+            data.candles.asQuoteEntryData()
+        } else {
+            emptyList()
+        }
+
     }
 
 
+    /**
+     * returns  value of time interval corresponding selected time resolution
+     * to avoid retrieving too much Entry values for chart rendering
+     */
+    private fun getInitialIntervalValue(endValue: Long, resolution: String): Long {
 
+        val interval: Long = when (resolution) {
+                           "1" ->  IntervalsInSeconds.HOUR_SECONDS.value * 2
+                           "5" ->  IntervalsInSeconds.HOUR_SECONDS.value * 5
+                           "15" ->  IntervalsInSeconds.HOUR_SECONDS.value * 5
+                           "30" ->  IntervalsInSeconds.DAY_SECONDS.value
+                           "60" -> IntervalsInSeconds.WEEK_SECONDS.value
+                           "D" -> IntervalsInSeconds.MONTH_SECONDS.value * 6
+                           "W" -> IntervalsInSeconds.YEAR_SECONDS.value
+                           "M" -> IntervalsInSeconds.YEAR_SECONDS.value
+            else -> {IntervalsInSeconds.DAY_SECONDS.value}
+        }
+        return endValue - interval
+    }
 
 }
