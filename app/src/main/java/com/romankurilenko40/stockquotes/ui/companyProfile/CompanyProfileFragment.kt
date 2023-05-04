@@ -19,7 +19,6 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.romankurilenko40.stockquotes.R
 import com.romankurilenko40.stockquotes.databinding.FragmentCompanyProfileBinding
-import com.romankurilenko40.stockquotes.network.CandlesDataResult
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -64,10 +63,9 @@ class CompanyProfileFragment: Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        viewModel.uiState.observe(viewLifecycleOwner) {
+        viewModel.profileState.observe(viewLifecycleOwner) {
             binding.company = it.companyProfile
             binding.quote = it.quote
-            binding.resolution = it.resolution
 
             it.quote.priceChange?.let { priceChange ->
                 if (priceChange > 0) {
@@ -83,17 +81,17 @@ class CompanyProfileFragment: Fragment() {
         }
 
         viewModel.chartState.observe(viewLifecycleOwner) { chartData ->
-            if (chartData.isNotEmpty()) {
-                binding.setupChart(chartData)
+            if (chartData.chartEntries.isNotEmpty()) {
+                binding.setupChart(chartData.chartEntries, chartData.resolution)
             }
         }
     }
 
-    private fun FragmentCompanyProfileBinding.setupChart(data: List<Entry>) {
+    private fun FragmentCompanyProfileBinding.setupChart(data: List<Entry>, resolution: String) {
         val chartData = LineDataSet(data, "Quote")
 
         quoteLineChart.setTouchEnabled(false)
-        quoteLineChart.axisLeft.isEnabled = false
+        quoteLineChart.axisRight.isEnabled = false
 
         val dateFormat = when(resolution) {
             "M" -> "yyyy-MM"
@@ -109,6 +107,9 @@ class CompanyProfileFragment: Fragment() {
 
         quoteLineChart.data = LineData(chartData)
 
+        quoteLineChart.data.setDrawValues(false)
+
+
         val xAxis = quoteLineChart.xAxis
         xAxis.valueFormatter = object : ValueFormatter() {
             override fun getAxisLabel(value: Float, axis: AxisBase?): String {
@@ -116,6 +117,10 @@ class CompanyProfileFragment: Fragment() {
             }
         }
         xAxis.position = XAxis.XAxisPosition.BOTTOM
+        xAxis.axisMaximum = data.last().x+0.1f
+
+        quoteLineChart.description.isEnabled = false
+
         quoteLineChart.animateY(500);
     }
 

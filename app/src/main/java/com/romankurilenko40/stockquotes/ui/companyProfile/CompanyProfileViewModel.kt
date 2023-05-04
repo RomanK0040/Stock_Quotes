@@ -17,9 +17,9 @@ class CompanyProfileViewModel(
         private const val DEFAULT_RESOLUTION = "D"
     }
 
-    val uiState: LiveData<CompanyProfileUiState>
+    val profileState: LiveData<CompanyProfileUiState>
 
-    val chartState: LiveData<List<Entry>>
+    val chartState: LiveData<ChartUiState>
 
     private val symbolLivedata = MutableLiveData<String>()
 
@@ -34,23 +34,27 @@ class CompanyProfileViewModel(
 
     init {
 
-        val resolution = MutableLiveData(DEFAULT_RESOLUTION)
-
-        uiState = symbolLivedata.switchMap { symbolData ->
+        profileState = symbolLivedata.switchMap { symbolData ->
             liveData {
                 val state = CompanyProfileUiState(
                     companyProfile = repository.fetchCompanyProfileInfo(symbolData),
-                    quote = repository.requestQuote(symbolData),
-                    resolution = resolution.value!!
+                    quote = repository.requestQuote(symbolData)
                 )
                 emit(state)
             }
         }
 
+        val resolution = MutableLiveData(DEFAULT_RESOLUTION)
+
         chartState = resolution.switchMap { newResolution ->
             liveData {
-                val chartData = repository.getQuoteChartData(symbolLivedata.value!!, newResolution)
-                emit(chartData)
+                val state = ChartUiState(
+                    resolution = newResolution,
+                    candlesData = repository.fetchStockCandles(symbolLivedata.value!!, newResolution),
+                    //TODO - same request makes twice - need to change
+                    chartEntries = repository.getQuoteChartData(symbolLivedata.value!!, newResolution)
+                )
+                emit(state)
             }
 
         }
@@ -82,8 +86,12 @@ class CompanyProfileViewModelFactory:  ViewModelProvider.Factory {
 
 data class CompanyProfileUiState (
     val companyProfile: Company,
-    val quote: Quote,
-    val resolution: String)
+    val quote: Quote)
+
+data class ChartUiState (
+    val resolution: String,
+    val candlesData: CandlesDataResult,
+    val chartEntries: List<Entry>)
 
 
 sealed class UiAction {
