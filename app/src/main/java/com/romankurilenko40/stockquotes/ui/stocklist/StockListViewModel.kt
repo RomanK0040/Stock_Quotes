@@ -2,6 +2,7 @@ package com.romankurilenko40.stockquotes.ui.stocklist
 
 import androidx.lifecycle.*
 import com.romankurilenko40.stockquotes.domain.Quote
+import com.romankurilenko40.stockquotes.domain.Stock
 import com.romankurilenko40.stockquotes.domain.StockExchange
 import com.romankurilenko40.stockquotes.network.StockNetworkResult
 import com.romankurilenko40.stockquotes.repository.StockQuotesRepository
@@ -70,7 +71,7 @@ class StockListViewModel(
                 }
                 is UiAction.BookmarkAction -> {
                     viewModelScope.launch {
-                        repository.putStockInBookmark(action.itemSymbol)
+                        repository.putStockInBookmark(action.item)
                     }
 
                 }
@@ -94,19 +95,21 @@ class StockListViewModel(
     companion object {
         private val DEFAULT_EXCHANGE: StockExchange = StockExchange(0, "US", "XNAS", "NASDAQ - All Markets")
 
-
-        val Factory = object : AbstractSavedStateViewModelFactory() {
-
-            override fun <T : ViewModel?> create(
-                key: String,
-                modelClass: Class<T>,
-                handle: SavedStateHandle
-            ): T {
-                @Suppress("UNCHECKED_CAST")
-                return StockListViewModel(StockQuotesRepository(), handle) as T
-            }
-        }
     }
+}
+
+class StockListViewModelFactory(
+    private val repository: StockQuotesRepository): AbstractSavedStateViewModelFactory() {
+
+    override fun <T : ViewModel?> create(
+        key: String,
+        modelClass: Class<T>,
+        handle: SavedStateHandle
+    ): T {
+        @Suppress("UNCHECKED_CAST")
+        return StockListViewModel(repository, handle) as T
+    }
+
 }
 
 
@@ -130,7 +133,7 @@ sealed class UiAction {
         val totalItemCount: Int
     ) : UiAction()
     data class BookmarkAction(
-        val itemSymbol: String
+        val item: Stock
     ) : UiAction()
 }
 

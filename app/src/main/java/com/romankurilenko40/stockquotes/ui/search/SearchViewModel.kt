@@ -54,18 +54,18 @@ class SearchViewModel(
     }
 
 
-    companion object {
-        val Factory = object : AbstractSavedStateViewModelFactory() {
+}
 
-            override fun <T : ViewModel?> create(
-                key: String,
-                modelClass: Class<T>,
-                handle: SavedStateHandle
-            ): T {
-                @Suppress("UNCHECKED_CAST")
-                return SearchViewModel(StockQuotesRepository(), handle) as T
-            }
-        }
+class SearchViewModelFactory(
+    private val repository: StockQuotesRepository):AbstractSavedStateViewModelFactory() {
+
+    override fun <T : ViewModel?> create(
+        key: String,
+        modelClass: Class<T>,
+        handle: SavedStateHandle
+    ): T {
+        @Suppress("UNCHECKED_CAST")
+        return SearchViewModel(repository, handle) as T
     }
 }
 

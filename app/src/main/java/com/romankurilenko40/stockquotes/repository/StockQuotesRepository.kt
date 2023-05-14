@@ -1,6 +1,8 @@
 package com.romankurilenko40.stockquotes.repository
 
+import androidx.lifecycle.asLiveData
 import com.github.mikephil.charting.data.Entry
+import com.romankurilenko40.stockquotes.database.StockDao
 import com.romankurilenko40.stockquotes.domain.Company
 import com.romankurilenko40.stockquotes.domain.Quote
 import com.romankurilenko40.stockquotes.domain.Stock
@@ -19,16 +21,19 @@ enum class IntervalsInSeconds(val value: Long) {
 
 private const val PAGE_SIZE = 15
 
-class StockQuotesRepository() {
+class StockQuotesRepository(private val stockDao: StockDao) {
 
-    //in-memory cache
-    private var stocks = listOf<Stock>()
+    //in-memory cache - не использовать для метода putStockInBookmark
+    //private var stocks = listOf<Stock>()
 
     private val stocksFlow = MutableSharedFlow<StockNetworkResult>(replay = 1)
 
     private val searchFlow = MutableSharedFlow<SearchResultContainer>(replay = 1)
 
+
     private var isRequestInProgress = false
+
+    val favoritesFlow = stockDao.getAllBookmarks()
 
 
     /**
@@ -36,7 +41,10 @@ class StockQuotesRepository() {
      */
     suspend fun getStocksBySelectedExchange(exchange: String, mic: String): Flow<StockNetworkResult> {
 
-        stocks = fetchStocksBySelectedExchange(exchange, mic)
+        val stocks = fetchStocksBySelectedExchange(exchange, mic)
+        for (stock in stocks) {
+            stock.inBookmark = checkBookmarks(stock)
+        }
 
         stocksFlow.emit(StockNetworkResult.Success(stocks))
 
@@ -56,15 +64,28 @@ class StockQuotesRepository() {
 
 
     /**
-     * Update the stock parameter "inBookmark" to opposite
+     * Add or delete stock from bookmarks storage
      */
-    suspend fun putStockInBookmark(symbol: String) {
-        for( stock in stocks) {
-            if (stock.symbol == symbol) {
-                stock.inBookmark = !stock.inBookmark
-            }
+    suspend fun putStockInBookmark(stock: Stock) {
+        if (stockDao.getStock(stock.symbol) != null) {
+            stockDao.deleteFromBookmark(stock)
+        } else {
+            stock.inBookmark = true
+            stockDao.insertNewBookmark(stock)
         }
-        stocksFlow.emit(StockNetworkResult.Success(stocks))
+
+        //stocksFlow.emit(StockNetworkResult.Success(stocks))
+    }
+
+
+    /**
+     * check whether particular stock store in bookmarks
+     */
+    private suspend fun checkBookmarks(stock: Stock): Boolean {
+        if (stockDao.getStock(stock.symbol) != null) {
+            return true
+        }
+        return false
     }
 
 

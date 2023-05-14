@@ -18,6 +18,7 @@ import com.github.mikephil.charting.data.LineDataSet
 
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.romankurilenko40.stockquotes.R
+import com.romankurilenko40.stockquotes.StockQuotesApplication
 import com.romankurilenko40.stockquotes.databinding.FragmentCompanyProfileBinding
 import java.text.SimpleDateFormat
 import java.util.*
@@ -32,7 +33,7 @@ class CompanyProfileFragment: Fragment() {
 
 
     private val viewModel: CompanyProfileViewModel by viewModels {
-        CompanyProfileViewModelFactory()
+        CompanyProfileViewModelFactory((requireActivity().application as StockQuotesApplication).repository)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

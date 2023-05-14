@@ -38,28 +38,28 @@ class ResponsePaginationUtils {
     /**
      * fetch quote data to each stock item for current page
      */
-    private suspend fun requestStocksWithQuote(mic: String): Boolean {
-        isRequestInProgress = true
-        var successful = false
-        try {
-            if (lastRequestedPage <= stocks.size) {
-                val stockListByPage = stocks.getValue(lastRequestedPage)
-                if (!stocksWithQuote.containsAll(stockListByPage)) {
-                    Log.i(TAG, "requested page # $lastRequestedPage in $mic")
-                    for (stock in stockListByPage) {
-                        Log.i(TAG, "requested quote for ${stock.symbol}")
-                        stock.quote = (requestQuote(stock.symbol))
-                    }
-                    stocksWithQuote.addAll(stockListByPage)
-                }
-                successful = true
-            }
-        } catch (exception: HttpException) {
-            Log.e(TAG, "Error during requesting quote: ${exception.message()}")
-        }
-        isRequestInProgress = false
-        return successful
-    }
+//    private suspend fun requestStocksWithQuote(mic: String): Boolean {
+//        isRequestInProgress = true
+//        var successful = false
+//        try {
+//            if (lastRequestedPage <= stocks.size) {
+//                val stockListByPage = stocks.getValue(lastRequestedPage)
+//                if (!stocksWithQuote.containsAll(stockListByPage)) {
+//                    Log.i(TAG, "requested page # $lastRequestedPage in $mic")
+//                    for (stock in stockListByPage) {
+//                        Log.i(TAG, "requested quote for ${stock.symbol}")
+//                        stock.quote = (requestQuote(stock.symbol))
+//                    }
+//                    stocksWithQuote.addAll(stockListByPage)
+//                }
+//                successful = true
+//            }
+//        } catch (exception: HttpException) {
+//            Log.e(TAG, "Error during requesting quote: ${exception.message()}")
+//        }
+//        isRequestInProgress = false
+//        return successful
+//    }
 
 
     /**

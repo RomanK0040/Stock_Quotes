@@ -1,6 +1,6 @@
 package com.romankurilenko40.stockquotes.ui.stocklist
 
-import android.content.Intent
+
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -21,11 +21,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.romankurilenko40.stockquotes.R
+import com.romankurilenko40.stockquotes.StockQuotesApplication
 import com.romankurilenko40.stockquotes.databinding.FragmentStockListBinding
 import com.romankurilenko40.stockquotes.domain.Stock
 import com.romankurilenko40.stockquotes.domain.StockExchange
 import com.romankurilenko40.stockquotes.network.StockNetworkResult
-import com.romankurilenko40.stockquotes.ui.companyProfile.CompanyProfileFragment
 
 const val SELECTED_SYMBOL = "selected symbol"
 
@@ -35,7 +35,7 @@ class StockListFragment: Fragment() {
 
 
     private val viewModel: StockListViewModel by viewModels {
-        StockListViewModel.Factory
+        StockListViewModelFactory((requireActivity().application as StockQuotesApplication).repository)
     }
 
 
@@ -103,7 +103,7 @@ class StockListFragment: Fragment() {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val exchange = exchangeMenu.selectedItem as StockExchange
                 itemSelected(UiAction.ItemSelected(selectedExchange = exchange))
-                stockList.scrollToPosition(0)
+                //stockList.scrollToPosition(0)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -134,7 +134,7 @@ class StockListFragment: Fragment() {
 
         val stocksAdapter = StockListAdapter(
             { stock -> itemClick(stock) },
-            { symbol -> itemOnBookmarked(symbol) }
+            { stock -> itemOnBookmarked(stock) }
         )
 
         stockList.adapter = stocksAdapter
@@ -180,9 +180,9 @@ class StockListFragment: Fragment() {
        })
    }
 
-    private fun itemOnBookmarked(itemSymbol: String) {
+    private fun itemOnBookmarked(item: Stock) {
         viewModel.uiAction (
-            UiAction.BookmarkAction(itemSymbol = itemSymbol)
+            UiAction.BookmarkAction(item = item)
         )
     }
 

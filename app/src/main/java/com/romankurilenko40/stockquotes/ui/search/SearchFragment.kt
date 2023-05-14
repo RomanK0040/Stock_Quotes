@@ -17,6 +17,7 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.romankurilenko40.stockquotes.R
+import com.romankurilenko40.stockquotes.StockQuotesApplication
 import com.romankurilenko40.stockquotes.databinding.FragmentSearchBinding
 import com.romankurilenko40.stockquotes.network.SearchResultItem
 
@@ -25,7 +26,7 @@ class SearchFragment: Fragment() {
     private lateinit var binding: FragmentSearchBinding
 
     private val viewModel: SearchViewModel by viewModels {
-        SearchViewModel.Factory
+        SearchViewModelFactory((requireActivity().application as StockQuotesApplication).repository)
     }
 
     override fun onCreateView(

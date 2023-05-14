@@ -1,6 +1,5 @@
 package com.romankurilenko40.stockquotes.ui.stocklist
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -12,9 +11,9 @@ import com.romankurilenko40.stockquotes.R
 import com.romankurilenko40.stockquotes.databinding.StockItemBinding
 import com.romankurilenko40.stockquotes.domain.Stock
 
-class StockListAdapter(
+open class StockListAdapter(
     private val onItemClick: (Stock) -> Unit,
-    private val onBookmarkClick: (String) -> Unit): ListAdapter<Stock, StockViewHolder>(DIFF_CALLBACK) {
+    private val onBookmarkClick: (Stock) -> Unit): ListAdapter<Stock, StockViewHolder>(DIFF_CALLBACK) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockViewHolder {
@@ -45,7 +44,7 @@ class StockListAdapter(
 
 class StockViewHolder(val binding: StockItemBinding,
                       val onItemClick: (Stock) -> Unit,
-                      val onBookmarkClick: (String) -> Unit): RecyclerView.ViewHolder(binding.root) {
+                      val onBookmarkClick: (Stock) -> Unit): RecyclerView.ViewHolder(binding.root) {
 
     private lateinit var stock: Stock
 
@@ -56,8 +55,8 @@ class StockViewHolder(val binding: StockItemBinding,
         }
 
         binding.favoriteIcon.setOnClickListener {
-            onBookmarkClick(stock.symbol)
-            if (stock.inBookmark) {
+            onBookmarkClick(stock)
+            if (!stock.inBookmark) {
                 binding.favoriteIcon.setImageResource(R.drawable.ic_bookmark_added_36)
             } else {
                 binding.favoriteIcon.setImageResource(R.drawable.ic_bookmark_not_added_36)
