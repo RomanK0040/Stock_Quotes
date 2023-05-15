@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.romankurilenko40.stockquotes.R
 import com.romankurilenko40.stockquotes.StockQuotesApplication
 import com.romankurilenko40.stockquotes.databinding.FragmentSearchBinding
+import com.romankurilenko40.stockquotes.network.SearchNetworkResult
 import com.romankurilenko40.stockquotes.network.SearchResultItem
 
 class SearchFragment: Fragment() {
@@ -50,12 +52,11 @@ class SearchFragment: Fragment() {
         binding.searchResultList.adapter = searchResultAdapter
         binding.searchResultList.layoutManager = LinearLayoutManager(context)
 
-        bindResultList(
+        binding.bindResultList(
             adapter = searchResultAdapter,
             uiState = viewModel.uiState
         )
 
-        binding.bindQuantityResult(viewModel.uiState)
 
         return binding.root
     }
@@ -104,25 +105,8 @@ class SearchFragment: Fragment() {
         }
     }
 
-    private fun FragmentSearchBinding.bindQuantityResult(uiState: LiveData<SearchUiState>) {
 
-        resultsCountLabel.visibility = View.INVISIBLE
-
-        uiState
-            .map(SearchUiState::searchResultCount)
-            .distinctUntilChanged()
-            .observe(viewLifecycleOwner) { count ->
-                if (count != null) {
-                    resultsCountLabel.text = resources.getQuantityText(R.plurals.search_counts, count)
-                    resultsCountLabel.visibility = View.VISIBLE
-                } else {
-                    resultsCountLabel.text = resources.getQuantityText(R.plurals.search_counts, 0)
-                    resultsCountLabel.visibility = View.VISIBLE
-                }
-            }
-    }
-
-    private fun bindResultList(
+    private fun FragmentSearchBinding.bindResultList(
         adapter: SearchResultAdapter,
         uiState: LiveData<SearchUiState>) {
 
@@ -130,7 +114,24 @@ class SearchFragment: Fragment() {
             .map(SearchUiState::searchResult)
             .distinctUntilChanged()
             .observe(viewLifecycleOwner) { searchResult ->
-                adapter.submitList(searchResult)
+                when(searchResult) {
+                    is SearchNetworkResult.Success -> {
+                        adapter.submitList(searchResult.data.result)
+                        resultsCountLabel.visibility = View.VISIBLE
+                        if (searchResult.data.count!! > 0) {
+                            resultsCountLabel.text = resources
+                                .getQuantityString(R.plurals.search_counts, searchResult.data.count, searchResult.data.count)
+                        } else {
+                            resultsCountLabel.text = resources.getQuantityString(R.plurals.search_counts, 0, 0)
+                        }
+                    }
+                    is SearchNetworkResult.Error -> {
+                        resultsCountLabel.visibility = View.INVISIBLE
+                        Toast.makeText(requireActivity(), "An error occured ${searchResult.error}", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                }
+
             }
     }
 

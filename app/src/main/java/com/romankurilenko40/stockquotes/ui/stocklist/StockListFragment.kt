@@ -148,8 +148,10 @@ class StockListFragment: Fragment() {
                 when (result) {
                     is StockNetworkResult.Success -> {
                         stocksAdapter.submitList(result.data)
+                        noResults.visibility = View.GONE
                     }
                     is StockNetworkResult.Error -> {
+                        noResults.visibility = View.VISIBLE
                         Toast.makeText(requireActivity(), "An error occured ${result.error}", Toast.LENGTH_LONG)
                             .show()
                     }

@@ -1,6 +1,5 @@
 package com.romankurilenko40.stockquotes.repository
 
-import androidx.lifecycle.asLiveData
 import com.github.mikephil.charting.data.Entry
 import com.romankurilenko40.stockquotes.database.StockDao
 import com.romankurilenko40.stockquotes.domain.Company
@@ -9,6 +8,8 @@ import com.romankurilenko40.stockquotes.domain.Stock
 import com.romankurilenko40.stockquotes.network.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import retrofit2.HttpException
+import java.io.IOException
 
 
 enum class IntervalsInSeconds(val value: Long) {
@@ -28,7 +29,7 @@ class StockQuotesRepository(private val stockDao: StockDao) {
 
     private val stocksFlow = MutableSharedFlow<StockNetworkResult>(replay = 1)
 
-    private val searchFlow = MutableSharedFlow<SearchResultContainer>(replay = 1)
+    private val searchFlow = MutableSharedFlow<SearchNetworkResult>(replay = 1)
 
 
     private var isRequestInProgress = false
@@ -41,12 +42,19 @@ class StockQuotesRepository(private val stockDao: StockDao) {
      */
     suspend fun getStocksBySelectedExchange(exchange: String, mic: String): Flow<StockNetworkResult> {
 
-        val stocks = fetchStocksBySelectedExchange(exchange, mic)
-        for (stock in stocks) {
-            stock.inBookmark = checkBookmarks(stock)
+        try {
+            val stocks = fetchStocksBySelectedExchange(exchange, mic)
+            for (stock in stocks) {
+                stock.inBookmark = checkBookmarks(stock)
+            }
+            stocksFlow.emit(StockNetworkResult.Success(stocks))
+        } catch (exception: IOException) {
+            stocksFlow.emit(StockNetworkResult.Error(exception))
+        } catch (exception: HttpException) {
+            stocksFlow.emit(StockNetworkResult.Error(exception))
         }
 
-        stocksFlow.emit(StockNetworkResult.Success(stocks))
+
 
         return stocksFlow
     }
@@ -55,9 +63,15 @@ class StockQuotesRepository(private val stockDao: StockDao) {
      * Search for best-matching symbols based on the query.
      * @param query - symbol or a name of the company
      */
-    suspend fun searchSymbol(query: String): Flow<SearchResultContainer> {
-        val result = FinnhubApi.apiService.searchSymbol(query)
-        searchFlow.emit(result)
+    suspend fun searchSymbol(query: String): Flow<SearchNetworkResult> {
+        try {
+            val result = FinnhubApi.apiService.searchSymbol(query)
+            searchFlow.emit(SearchNetworkResult.Success(result))
+        } catch (exception: IOException) {
+            searchFlow.emit(SearchNetworkResult.Error(exception))
+        } catch (exception: HttpException) {
+            searchFlow.emit(SearchNetworkResult.Error(exception))
+        }
 
         return searchFlow
     }
@@ -102,20 +116,39 @@ class StockQuotesRepository(private val stockDao: StockDao) {
      * separately requests an actual quote for the stock
      */
     suspend fun requestQuote(symbol: String): Quote {
-        val quote = FinnhubApi.apiService.getQuote(symbol)
-        return Quote(quote.c, quote.d, quote.dp, quote.h, quote.l, quote.o, quote.pc)
+        var quote = Quote()
+        try {
+            val quoteResponse = FinnhubApi.apiService.getQuote(symbol)
+            quote = Quote(quoteResponse.c, quoteResponse.d, quoteResponse.dp, quoteResponse.h, quoteResponse.l, quoteResponse.o, quoteResponse.pc)
+        } catch (exception: IOException) {
+
+        } catch (exception: HttpException) {
+
+        }
+
+        return quote
     }
 
     /**
      * Fetch company profile info by provied stock symbol/ticker
      */
-    suspend fun fetchCompanyProfileInfo(symbol: String): Company {
-        val company = FinnhubApi.apiService.getCompanyProfile(symbol)
-        return Company(
-            company.country, company.currency, company.exchange,
-            company.finnhubIndustry, company.ipo, company.logo,
-            company.marketCapitalization, company.name, company.phone,
-            company.shareOutstanding, company.ticker, company.weburl)
+    suspend fun fetchCompanyProfileInfo(symbol: String): ProfileNetworkResult {
+        var companyProfile: ProfileNetworkResult
+        try {
+            val companyResponse = FinnhubApi.apiService.getCompanyProfile(symbol)
+            val company = Company(
+                companyResponse.country, companyResponse.currency, companyResponse.exchange,
+                companyResponse.finnhubIndustry, companyResponse.ipo, companyResponse.logo,
+                companyResponse.marketCapitalization, companyResponse.name, companyResponse.phone,
+                companyResponse.shareOutstanding, companyResponse.ticker, companyResponse.weburl)
+            companyProfile = ProfileNetworkResult.Success(company)
+        } catch (exception: IOException) {
+            companyProfile = ProfileNetworkResult.Error(exception)
+        } catch (exception: HttpException) {
+            companyProfile = ProfileNetworkResult.Error(exception)
+        }
+
+        return companyProfile
     }
 
     /**

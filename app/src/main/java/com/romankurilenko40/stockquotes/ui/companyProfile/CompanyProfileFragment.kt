@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResultListener
@@ -20,6 +21,7 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import com.romankurilenko40.stockquotes.R
 import com.romankurilenko40.stockquotes.StockQuotesApplication
 import com.romankurilenko40.stockquotes.databinding.FragmentCompanyProfileBinding
+import com.romankurilenko40.stockquotes.network.ProfileNetworkResult
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -65,7 +67,12 @@ class CompanyProfileFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewModel.profileState.observe(viewLifecycleOwner) {
-            binding.company = it.companyProfile
+            if (it.companyProfile is ProfileNetworkResult.Success) {
+                binding.company = it.companyProfile.data
+            } else if (it.companyProfile is ProfileNetworkResult.Error){
+                Toast.makeText(requireActivity(), "An error occured ${it.companyProfile.error}", Toast.LENGTH_LONG)
+                    .show()
+            }
             binding.quote = it.quote
 
             it.quote.priceChange?.let { priceChange ->

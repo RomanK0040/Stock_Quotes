@@ -5,6 +5,7 @@ import com.github.mikephil.charting.data.Entry
 import com.romankurilenko40.stockquotes.domain.Company
 import com.romankurilenko40.stockquotes.domain.Quote
 import com.romankurilenko40.stockquotes.network.CandlesDataResult
+import com.romankurilenko40.stockquotes.network.ProfileNetworkResult
 import com.romankurilenko40.stockquotes.repository.StockQuotesRepository
 
 
@@ -81,7 +82,7 @@ class CompanyProfileViewModelFactory(private val repository: StockQuotesReposito
 
 
 data class CompanyProfileUiState (
-    val companyProfile: Company,
+    val companyProfile: ProfileNetworkResult,
     val quote: Quote)
 
 data class ChartUiState (

@@ -1,6 +1,7 @@
 package com.romankurilenko40.stockquotes.ui.search
 
 import androidx.lifecycle.*
+import com.romankurilenko40.stockquotes.network.SearchNetworkResult
 import com.romankurilenko40.stockquotes.network.SearchResultItem
 import com.romankurilenko40.stockquotes.repository.StockQuotesRepository
 import kotlinx.coroutines.flow.map
@@ -31,8 +32,7 @@ class SearchViewModel(
                             .map {
                                 SearchUiState(
                                     searchString = searchRequest,
-                                    searchResultCount = it.count,
-                                    searchResult = it.result
+                                    searchResult = it
                                 )
                             }.asLiveData()
                         emitSource(state)
@@ -71,8 +71,7 @@ class SearchViewModelFactory(
 
 data class SearchUiState(
     val searchString: String?,
-    val searchResultCount :Int?,
-    val searchResult: List<SearchResultItem>?
+    val searchResult: SearchNetworkResult,
 )
 
 sealed class UiAction {

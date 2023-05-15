@@ -6,6 +6,8 @@
     <string name="market_news">News</string>
     <string name="search">Search</string>
 
+    <string name="no_result">Couldn\'t access data…</string>
+
     <plurals name="search_counts">
         <item quantity="one">found %1$d result</item>
         <item quantity="other">found %1$d results</item>
